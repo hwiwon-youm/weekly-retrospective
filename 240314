@@ -1,0 +1,31 @@
+# 기술 리포트
+### 1. Django, Model.get_FOO_display()¶
+선택 항목이 설정된 모든 필드에 대해 객체에는 get_FOO_display() 메서드가 있으며, 여기서 FOO는 필드 이름이다.  
+이 메서드는 필드의 "human-readable" 값을 반환한다.
+참고자료. https://docs.djangoproject.com/en/5.0/ref/models/instances/
+
+### 2. Django, Model._state
+state 속성은 모델 인스턴스의 수명 주기를 추적하는 ModelState 객체를 참조한다.  
+ModelState 개체에는 모델이 아직 데이터베이스에 저장되지 않은 경우 True인 플래그인 adding과 인스턴스가 로드되거나 저장된 데이터베이스 별칭을 참조하는 문자열인 db라는 두 가지 속성이 있다.
+새로 인스턴스화된 인스턴스는 아직 저장되지 않았으므로 adding=True 및 db=None을 갖습니다. 쿼리 집합에서 가져온 인스턴스는 add=False 및 db가 연결된 데이터베이스의 별칭으로 설정된다.
+
+### 3. Django, apps.get_model(app_label, model_name, require_ready=True)
+지정된 앱_라벨과 모델명을 가진 모델을 반환한다.  
+이 메서드는 단축키로서 app_label.model_name 형식의 단일 인수를 사용할 수 있다.  
+model_name은 대소문자를 구분하지 않는다.
+해당 애플리케이션이나 모델이 존재하지 않으면 LookupError를 발생, 단일 인자로 호출하면 ValueError를 발생시킨다.
+require_ready 인수가 False로 설정되지 않은 경우 앱 레지스트리가 완전히 채워져야 합니다.  
+("Requires the app registry to be fully populated", Django는 시작할 때 모든 앱의 구성을 로드하고, 각 앱의 모델을 레지스트리에 등록하는데, 이 과정이 완전히 끝나기 전에 모델을 참조하려고 하면 이 오류가 발생)
+require_ready를 False로 설정하면 앱 레지스트리가 채워지는 동안, 특히 모델을 가져오는 두 번째 단계에서 모델을 조회할 수 있다.  
+그러면 get_model()은 모델을 가져오는 것과 동일한 효과를 갖는다.  
+주요 사용 예시는 AUTH_USER_MODEL과 같은 설정으로 모델 클래스를 구성하는 것이다.  
+require_ready가 False인 경우 get_model()은 앱 레지스트리가 완전히 채워질 때까지 완전히 작동하지 않을 수 있는 모델 클래스(예: 역방향 접근자가 누락될 수 있음)를 반환한다.  
+따라서 가능하면 require_ready를 기본값인 True로 두는 것이 가장 좋다.
+```
+getattr(test.models, target_class) # 기존 작성
+apps.get_model('test', 'model_name') # 메서드 사용
+```
+
+
+
+
